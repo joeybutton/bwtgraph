@@ -1,0 +1,4 @@
+start,end,type,ref,reads
+1520678,1520679,m,G,A
+1520682,1520683,m,A,G
+1520678,1520682,del,GTTT,
