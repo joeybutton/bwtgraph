@@ -60,13 +60,35 @@ def traversals(s,e,graph):
     if s == e:
         return [e]
     travs = []
+    print(s)
     print(graph[s])
     for n in graph[s]['out']:
         travs.append(traversals(n,e,graph))
     return travs
 
+# def fit(graph, read):
+#     matrix = [[]]
+#     for x in range(len(graph)+1):
+#     	for y in range(len(read)+1):
 
 
+#     for i in range(0,len(string1)+1):
+#         matrix[i][0] = -i*5
+#     for j in range(0,len(string2)+1):
+#         matrix[0][j] = -j*5
+        
+#     for i in range(1, len(string1)+1):
+#         for j in range(1, len(string2)+1):
+#             a = (string1[i-1], string2[j-1])
+#             if a not in pam250:
+#                 a = (string2[j-1], string1[i-1])
+#             scores = [0, matrix[i-1][j] - 5, matrix[i][j-1] - 5,
+#                       matrix[i-1][j-1] + pam250[a]] 
+#                       #just need to add a 0 for taxis
+                     
+#             matrix[i][j] = max(scores)
+
+#     return alignment
 
 parser = argparse.ArgumentParser(description='read in input file')
 parser.add_argument('filename', metavar='f', type=str, nargs='+',
@@ -75,8 +97,78 @@ parser.add_argument('filename', metavar='f', type=str, nargs='+',
 args = parser.parse_args()
 variants = read_file(args.filename[0])
 
+def graph_to_dict(graph):
+	dic_graph = {}
+	for i in range(len(graph)):
+		dic_graph[i] = graph[i]
+
+	return dic_graph
+
+# L ← Empty list that will contain the sorted nodes
+# while there are unmarked nodes do
+#     select an unmarked node n
+#     visit(n) 
+
+#  function visit(node n)
+#     if n has a temporary mark then stop (not a DAG)
+#     if n is not marked (i.e. has not been visited yet) then
+#         mark n temporarily
+#         for each node m with an edge from n to m do
+#             visit(m)
+#         mark n permanently
+#         unmark n temporarily
+#         add n to head of L
+
+# def topo_sort(graph):
+# 	unprocessed = []
+
+# 	root = 0
+# 	root_successors = graph[0]["out"]
+
+# 	MUTABLE_LIST.append(root)
+
+# 	for each in root_successors:
+
+# 	for entry in graph:
+# 		unprocessed.append(entry)
+
+# 	for entry in unprocessed:
+
+
+# 	return sorted_graph
 
 graph = ref_to_graph()
 graph_varied = variants_onto_graph(graph,variants)
+graph_dict = graph_to_dict(graph_varied)
+#print(graph_dict)
 
-traversals(170,176,graph_varied)
+L = []
+marked = []
+toVisit = list(graph_dict.keys())
+#print(toVisit)
+
+def visit(node, graph):
+	if node in marked:
+		return("NOT DAG ALERT")
+	if node in toVisit:
+		#if node == 337:
+			#print(graph[node]["out"])
+		marked.append(node)
+		for entry in graph[node]["out"]:
+			print(entry)
+			visit(entry, graph_dict)
+		toVisit.remove(node)
+		marked.remove(node)
+		L.insert(0,node)
+
+while len(toVisit) > 0:
+	visit(toVisit[0], graph_dict)
+
+#print(L)
+
+# stringholder = ''
+# for value in L:
+# 	stringholder += graph_dict[value]["base"]
+# print(stringholder)
+
+#traversals(170,180,graph_varied)
