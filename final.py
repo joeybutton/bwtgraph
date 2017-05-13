@@ -22,10 +22,14 @@ def ref_to_graph(ref):
     graph = list()
     for i in range(len(ref)):
         base = REF[i]
+        out = [i+1] 
+        if out[0] >= len(ref): out = []
+        iinn = [i-1]
+        if iinn[0] <= -1: iinn = []
         graph.append({
             'base': base,
-            'out': [i+1],
-            'in': [i-1]
+            'out': out,
+            'in': iinn
             })
     return graph
 
@@ -110,35 +114,35 @@ while len(toVisit) > 0:
 
 def fit(graph, read, penalty, graph_dict):
     matrix = [[(0,(-1,-1)) for x in range(len(graph)+1)] for y in range(len(read)+1)]
-
-    for i in range(0,len(read)+1):
-        matrix[i][0] = (0,(-1,-1))
-    for j in range(0,len(graph)+1):
-        matrix[0][j] = (0,(-1,-1))
-        
+    print(graph)
+    print(graph_dict)
     for i in range(1, len(read)+1):
-        for j in range(1, len(graph)+1):
+        for row in matrix:
+            print([l[0] for l in row])
+        for j in range(0, len(graph)+1):
+            print(read[i-1],graph_dict[graph[j-1]]['base'])
             #score
             scores = []
+            # print( graph_dict[graph[j]]["in"],graph[j],graph_dict[graph[j]]) 
             for in_edge in graph_dict[graph[j-1]]["in"]:
-                if in_edge == -1:
-                    continue
+                
                 #pams
                 a = (read[i-1], graph_dict[in_edge]["base"])
                 if a not in pam250:
                     a = (graph_dict[in_edge]["base"], read[i-1])
 
-                scores.append( (matrix[i-1][graph.index(in_edge)][0] + pam250[a], (i-1,graph.index(in_edge)) ))
-                scores.append((matrix[i][graph.index(in_edge)][0] + penalty, (i,graph.index(in_edge)) ) )
+                scores.append((matrix[i-1][graph.index(in_edge)][0] + pam250[a], (i-1, graph.index(in_edge)) ))
+                scores.append((matrix[i][graph.index(in_edge)][0] + penalty, (i, graph.index(in_edge))))
 
-            scores.extend([ (matrix[i-1][j][0] + penalty, (i-1,j)) , (0,(-1,-1))])
-                     
-            matrix[i][j] = max(scores,key=lambda p: p[0])
+            scores.extend([ (matrix[i-1][j-1][0] + penalty, (i-1,j)) , (0,(-1,-1))])  
+
+            matrix[i][j-1] = max(scores,key=lambda p: p[0])
+
+            print(i,j)
 
     return matrix
 
 def backtrack(scores, max_score, penalty, topo, read, graph_dict):
-    score = max_score
     max_i = [max(j,key=lambda p: p[0]) for j in scores].index(max_score)
     max_j = scores[max_i].index(max_score)
     print(max_i,max_j)
@@ -172,14 +176,13 @@ def backtrack(scores, max_score, penalty, topo, read, graph_dict):
     return s1, s2
             
 reads = [
-    {"RAW":'MEANLY'},
-    {"RAW":'ENALTY'}
+    {"RAW":'MEANLY'}
     ]
 for read in reads:
     mat = fit(L, read['RAW'], PENALTY, graph_dict)
     for row in mat:
-        print(row)
-    topo,align = backtrack(mat,max([max(l,key=lambda p:p[0]) for l in mat]), PENALTY, L, read['RAW'], graph_dict)
+        print([l[0] for l in row])
+    # topo,align = backtrack(mat,max([max(l,key=lambda p:p[0]) for l in mat]), PENALTY, L, read['RAW'], graph_dict)
     print(topo)
     print(align)
     print('∆'*10)
