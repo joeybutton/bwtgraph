@@ -147,28 +147,26 @@ marked = []
 toVisit = list(graph_dict.keys())
 #print(toVisit)
 
-def visit(node, graph):
+def visit(node):
 	if node in marked:
 		return("NOT DAG ALERT")
 	if node in toVisit:
-		#if node == 337:
-			#print(graph[node]["out"])
 		marked.append(node)
-		for entry in graph[node]["out"]:
-			print(entry)
-			visit(entry, graph_dict)
+		for entry in sorted(graph_dict[node]["out"])[::-1]:
+			visit(entry)
 		toVisit.remove(node)
 		marked.remove(node)
 		L.insert(0,node)
 
+# Toposort our graph
 while len(toVisit) > 0:
-	visit(toVisit[0], graph_dict)
+	visit(toVisit[0])
 
-#print(L)
+print(L)
 
 # stringholder = ''
 # for value in L:
 # 	stringholder += graph_dict[value]["base"]
 # print(stringholder)
 
-#traversals(170,180,graph_varied)
+traversals(170,180,graph_varied)
