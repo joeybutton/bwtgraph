@@ -8,9 +8,9 @@ REF = "TTGTTTTCTTTTGAAACAGAATCTCACTCTGCAGTCCAGGCTGGAGTGCAGCGGTGCAATCTTGGCTCACTGC
 START = 1520505
 END = 1520840
 
-def read_file(filename):
+def read_file(filename,delim=","):
     with open(filename, 'rb') as csvfile:
-        reader = csv.DictReader(csvfile)
+        reader = csv.DictReader(csvfile,delimiter=delim)
         variants = list()
         for row in reader:
             variants.append(row)
@@ -69,9 +69,12 @@ def traversals(s,e,graph):
 parser = argparse.ArgumentParser(description='read in input file')
 parser.add_argument('filename', metavar='f', type=str, nargs='+',
                     help='filename of input')
+parser.add_argument('reads', metavar='r', type=str, nargs='+',
+                    help='filename of input')
 
 args = parser.parse_args()
 variants = read_file(args.filename[0])
+reads = read_file(args.reads[0],'\t')
 
 def graph_to_dict(graph):
     dic_graph = {}
@@ -104,7 +107,7 @@ while len(toVisit) > 0:
     visit(toVisit[0])
 
 def fit(graph, read, penalty, graph_dict):
-     matrix = [[0 for x in range(len(graph)+1)] for y in range(len(read)+1)]
+    matrix = [[0 for x in range(len(graph)+1)] for y in range(len(read)+1)]
 
     for i in range(0,len(read)+1):
         matrix[i][0] = -i*penalty
@@ -121,7 +124,7 @@ def fit(graph, read, penalty, graph_dict):
 
             #score
             scores = []
-            for in_edge in graph_dict[j]["in"]:
+            for in_edge in graph_dict[graph[j]]["in"]:
                 scores.append(matrix[i-1][in_edge])
                 scores.append(matrix[i][in_edge])
             scores.extend([matrix[i-1][j], pam250[a], 0])
