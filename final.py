@@ -74,11 +74,11 @@ args = parser.parse_args()
 variants = read_file(args.filename[0])
 
 def graph_to_dict(graph):
-	dic_graph = {}
-	for i in range(len(graph)):
-		dic_graph[i] = graph[i]
+    dic_graph = {}
+    for i in range(len(graph)):
+        dic_graph[i] = graph[i]
 
-	return dic_graph
+    return dic_graph
 
 graph = ref_to_graph()
 graph_varied = variants_onto_graph(graph,variants)
@@ -89,22 +89,22 @@ marked = []
 toVisit = list(graph_dict.keys())
 
 def visit(node):
-	if node in marked:
-		return("NOT DAG ALERT")
-	if node in toVisit:
-		marked.append(node)
-		for entry in sorted(graph_dict[node]["out"])[::-1]:
-			visit(entry)
-		toVisit.remove(node)
-		marked.remove(node)
-		L.insert(0,node)
+    if node in marked:
+        return("NOT DAG ALERT")
+    if node in toVisit:
+        marked.append(node)
+        for entry in sorted(graph_dict[node]["out"])[::-1]:
+            visit(entry)
+        toVisit.remove(node)
+        marked.remove(node)
+        L.insert(0,node)
 
 # Toposort our graph
 while len(toVisit) > 0:
-	visit(toVisit[0])
+    visit(toVisit[0])
 
 def fit(graph, read, penalty, graph_dict):
- 	matrix = [[0 for x in range(len(graph)+1)] for y in range(len(read)+1)]
+     matrix = [[0 for x in range(len(graph)+1)] for y in range(len(read)+1)]
 
     for i in range(0,len(read)+1):
         matrix[i][0] = -i*penalty
@@ -114,7 +114,7 @@ def fit(graph, read, penalty, graph_dict):
     for i in range(1, len(read)+1):
         for j in range(1, len(graph)+1):
 
-        	#for looking up in pam250
+            #for looking up in pam250
             a = (read[i-1], graph_dict[graph[j-1]]["base"])
             if a not in pam250:
                 a = (graph_dict[graph[j-1]]["base"], read[i-1])
@@ -122,12 +122,12 @@ def fit(graph, read, penalty, graph_dict):
             #score
             scores = []
             for in_edge in graph_dict[j]["in"]:
-            	scores.append(matrix[i-1][in_edge])
-            	scores.append(matrix[i][in_edge])
+                scores.append(matrix[i-1][in_edge])
+                scores.append(matrix[i][in_edge])
             scores.extend([matrix[i-1][j], pam250[a], 0])
                      
             matrix[i][j] = max(scores)
 
     return matrix[len(graph)][len(read)]
 
-fit(L, , -5, graph_dict)
+fit(L, 'GTGCAATCTTGGCTCACTGCAACCTCTGCCTTGTGAGTTCAAGCGATTCTCCTGCCTCAGCCTCTAGACTAGCTGGGATTACAGGTGCATGCCACCATGT', -5, graph_dict)
