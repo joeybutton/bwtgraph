@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from Bio.SubsMat.MatrixInfo import blosum62
+from Bio.SubsMat.MatrixInfo import pam250
 import argparse
 import csv 
 
@@ -66,30 +66,6 @@ def traversals(s,e,graph):
         travs.append(traversals(n,e,graph))
     return travs
 
-# def fit(graph, read):
-#     matrix = [[]]
-#     for x in range(len(graph)+1):
-#     	for y in range(len(read)+1):
-
-
-#     for i in range(0,len(string1)+1):
-#         matrix[i][0] = -i*5
-#     for j in range(0,len(string2)+1):
-#         matrix[0][j] = -j*5
-        
-#     for i in range(1, len(string1)+1):
-#         for j in range(1, len(string2)+1):
-#             a = (string1[i-1], string2[j-1])
-#             if a not in pam250:
-#                 a = (string2[j-1], string1[i-1])
-#             scores = [0, matrix[i-1][j] - 5, matrix[i][j-1] - 5,
-#                       matrix[i-1][j-1] + pam250[a]] 
-#                       #just need to add a 0 for taxis
-                     
-#             matrix[i][j] = max(scores)
-
-#     return alignment
-
 parser = argparse.ArgumentParser(description='read in input file')
 parser.add_argument('filename', metavar='f', type=str, nargs='+',
                     help='filename of input')
@@ -104,48 +80,13 @@ def graph_to_dict(graph):
 
 	return dic_graph
 
-# L ← Empty list that will contain the sorted nodes
-# while there are unmarked nodes do
-#     select an unmarked node n
-#     visit(n) 
-
-#  function visit(node n)
-#     if n has a temporary mark then stop (not a DAG)
-#     if n is not marked (i.e. has not been visited yet) then
-#         mark n temporarily
-#         for each node m with an edge from n to m do
-#             visit(m)
-#         mark n permanently
-#         unmark n temporarily
-#         add n to head of L
-
-# def topo_sort(graph):
-# 	unprocessed = []
-
-# 	root = 0
-# 	root_successors = graph[0]["out"]
-
-# 	MUTABLE_LIST.append(root)
-
-# 	for each in root_successors:
-
-# 	for entry in graph:
-# 		unprocessed.append(entry)
-
-# 	for entry in unprocessed:
-
-
-# 	return sorted_graph
-
 graph = ref_to_graph()
 graph_varied = variants_onto_graph(graph,variants)
 graph_dict = graph_to_dict(graph_varied)
-#print(graph_dict)
 
 L = []
 marked = []
 toVisit = list(graph_dict.keys())
-#print(toVisit)
 
 def visit(node):
 	if node in marked:
@@ -162,11 +103,31 @@ def visit(node):
 while len(toVisit) > 0:
 	visit(toVisit[0])
 
-print(L)
+def fit(graph, read, penalty, graph_dict):
+ 	matrix = [[0 for x in range(len(graph)+1)] for y in range(len(read)+1)]
 
-# stringholder = ''
-# for value in L:
-# 	stringholder += graph_dict[value]["base"]
-# print(stringholder)
+    for i in range(0,len(read)+1):
+        matrix[i][0] = -i*penalty
+    for j in range(0,len(graph)+1):
+        matrix[0][j] = -j*penalty
+        
+    for i in range(1, len(read)+1):
+        for j in range(1, len(graph)+1):
 
-traversals(170,180,graph_varied)
+        	#for looking up in pam250
+            a = (read[i-1], graph_dict[graph[j-1]]["base"])
+            if a not in pam250:
+                a = (graph_dict[graph[j-1]]["base"], read[i-1])
+
+            #score
+            scores = []
+            for in_edge in graph_dict[j]["in"]:
+            	scores.append(matrix[i-1][in_edge])
+            	scores.append(matrix[i][in_edge])
+            scores.extend([matrix[i-1][j], pam250[a], 0])
+                     
+            matrix[i][j] = max(scores)
+
+    return matrix[len(graph)][len(read)]
+
+fit(L, , -5, graph_dict)
