@@ -4,8 +4,8 @@ import argparse
 import csv 
 
 
-# REF = "TTGTTTTCTTTTGAAACAGAATCTCACTCTGCAGTCCAGGCTGGAGTGCAGCGGTGCAATCTTGGCTCACTGCAACCTCTGCCTTGTGAGTTCAAGCGATTCTCCTGCCTCAGCCTCTAGACTAGCTGGGATTACAGGTGCATGCCACCATGTCCAGCTAACTTTTTTTGTTTGTTTATTTGTTTGTTTGTTTGTTTTGAGACGGAGTCTTGCTCTATTGCCCAGGCTGGAGTGCAGTGGTGCAATCTCGGCTCACTGCAAGCTTCACCTCCCGGGTTCATGCCATTCTTCTGCCTCAGCCTCCCAAGTAGCTGGGACTACAAGTGCCCGCCACCA"
-REF = "PENALTY"
+REF = "TTGTTTTCTTTTGAAACAGAATCTCACTCTGCAGTCCAGGCTGGAGTGCAGCGGTGCAATCTTGGCTCACTGCAACCTCTGCCTTGTGAGTTCAAGCGATTCTCCTGCCTCAGCCTCTAGACTAGCTGGGATTACAGGTGCATGCCACCATGTCCAGCTAACTTTTTTTGTTTGTTTATTTGTTTGTTTGTTTGTTTTGAGACGGAGTCTTGCTCTATTGCCCAGGCTGGAGTGCAGTGGTGCAATCTCGGCTCACTGCAAGCTTCACCTCCCGGGTTCATGCCATTCTTCTGCCTCAGCCTCCCAAGTAGCTGGGACTACAAGTGCCCGCCACCA"
+# REF = "PENALTY"
 START = 1520505
 END = 1520840
 PENALTY = -5
@@ -114,38 +114,29 @@ while len(toVisit) > 0:
 
 def fit(graph, read, penalty, graph_dict):
     matrix = [[(0,(-1,-1)) for x in range(len(graph)+1)] for y in range(len(read)+1)]
-    print(graph)
-    print(graph_dict)
     for i in range(1, len(read)+1):
-        for row in matrix:
-            print([l[0] for l in row])
-        for j in range(0, len(graph)+1):
-            print(read[i-1],graph_dict[graph[j-1]]['base'])
+        for j in range(1, len(graph)+1):
             #score
             scores = []
-            # print( graph_dict[graph[j]]["in"],graph[j],graph_dict[graph[j]]) 
             for in_edge in graph_dict[graph[j-1]]["in"]:
-                
                 #pams
-                a = (read[i-1], graph_dict[in_edge]["base"])
+                a = (read[i-1], graph_dict[graph[j-1]]["base"])
                 if a not in pam250:
-                    a = (graph_dict[in_edge]["base"], read[i-1])
+                    a = (graph_dict[graph[j-1]]["base"], read[i-1])
 
-                scores.append((matrix[i-1][graph.index(in_edge)][0] + pam250[a], (i-1, graph.index(in_edge)) ))
-                scores.append((matrix[i][graph.index(in_edge)][0] + penalty, (i, graph.index(in_edge))))
+                scores.append((matrix[i-1][graph.index(in_edge)+1][0] + pam250[a], (i-1, graph.index(in_edge)+1) ))
+                scores.append((matrix[i][graph.index(in_edge)+1][0] + penalty, (i, graph.index(in_edge)+1)))
 
-            scores.extend([ (matrix[i-1][j-1][0] + penalty, (i-1,j)) , (0,(-1,-1))])  
+            scores.extend([ (matrix[i-1][j][0] + penalty, (i-1,j)) , (0,(-1,-1))])  
 
-            matrix[i][j-1] = max(scores,key=lambda p: p[0])
-
-            print(i,j)
+            matrix[i][j] = max(scores,key=lambda p: p[0])
 
     return matrix
 
 def backtrack(scores, max_score, penalty, topo, read, graph_dict):
     max_i = [max(j,key=lambda p: p[0]) for j in scores].index(max_score)
     max_j = scores[max_i].index(max_score)
-    print(max_i,max_j)
+    # print(max_i,max_j)
     # print([i[:max_j] for i in scores[:max_i]])
     i, j = max_i, max_j
     s1, s2 = '', ''
@@ -155,7 +146,7 @@ def backtrack(scores, max_score, penalty, topo, read, graph_dict):
     
     while (i > 0 and j > 0):
         cur = scores[i][j]
-        if cur == 0:
+        if cur[0] == 0:
             break
 
         pred = cur[1]
@@ -175,14 +166,14 @@ def backtrack(scores, max_score, penalty, topo, read, graph_dict):
         i,j = pred
     return s1, s2
             
-reads = [
+reads2 = [
     {"RAW":'MEANLY'}
     ]
 for read in reads:
     mat = fit(L, read['RAW'], PENALTY, graph_dict)
-    for row in mat:
-        print([l[0] for l in row])
-    # topo,align = backtrack(mat,max([max(l,key=lambda p:p[0]) for l in mat]), PENALTY, L, read['RAW'], graph_dict)
+    # for row in mat:
+    #     print([l[0] for l in row])
+    topo,align = backtrack(mat,max([max(l,key=lambda p:p[0]) for l in mat]), PENALTY, L, read['RAW'], graph_dict)
     print(topo)
     print(align)
     print('∆'*10)
