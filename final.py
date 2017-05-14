@@ -2,7 +2,7 @@
 """
 joeybutton and leomcelroy Bioinformatics final project
 
-Usage on with test data: python final.py variants.csv reads-NA12878.sam
+Usage on with test data: python swag.py variants.csv reads-NA12878.sam
 
 Implementation of Smith-Waterman algorithm on a variation graph for demonstrating local alignment of reads to the reference with known variations
 
