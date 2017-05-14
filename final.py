@@ -152,18 +152,18 @@ def backtrack(scores, max_score, penalty, topo, read, graph_dict):
         pred = cur[1]
         if pred[0] == i:
             # came from same column
-            s2 = "-"+s2     
+            s2 = ((j-pred[1])*'-')+s2     
             s1 = str(graph_dict[topo[j-1]]['base']) + s1
         elif pred[1] == j:
             # came from same row
             s2 = read[i-1]+s2     
-            s1 = "-" + s1
+            # s1 = "-" + s1
         else:
             # use both
             s2 = read[i-1]+s2
-            s1 = str(graph_dict[topo[j-1]]['base']) + s1
-        
+            s1 = str(graph_dict[topo[j-1]]['base']) + s1      
         i,j = pred
+
     return s1, s2
             
 reads2 = [
@@ -174,6 +174,6 @@ for read in reads:
     # for row in mat:
     #     print([l[0] for l in row])
     topo,align = backtrack(mat,max([max(l,key=lambda p:p[0]) for l in mat]), PENALTY, L, read['RAW'], graph_dict)
-    print(topo)
-    print(align)
+    print("Rfr: " +topo)
+    print("Rad: " +align)
     print('∆'*10)
