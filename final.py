@@ -1,8 +1,17 @@
 # -*- coding: utf-8 -*-
 """
-Some notes:
-topologically sorted graph is just used as a lookup table between our scores matrix and our actual scoring matrix
+joeybutton and leomcelroy Bioinformatics final project
 
+Usage on with test data: python final.py variants.csv reads-NA12878.sam
+
+Implementation of Smith-Waterman algorithm on a variation graph for demonstrating local alignment of reads to the reference with known variations
+
+Some notes:
+--- Topologically sorted graph is just used as a lookup table between our scores matrix and our actual scoring matrix
+--- Scoring matrix is just a holding data structure for values in the graph
+--- Smith-Waterman algorithm is implemented using adjacencies in the graph - not adjacent cells in the matrix
+--- A Header line was added to the SAM file for easy use
+--- Variants.csv can be created from any standard VCF, 
 """
 from Bio.SubsMat.MatrixInfo import pam250
 import argparse
@@ -12,7 +21,7 @@ import csv
 REF = "TTGTTTTCTTTTGAAACAGAATCTCACTCTGCAGTCCAGGCTGGAGTGCAGCGGTGCAATCTTGGCTCACTGCAACCTCTGCCTTGTGAGTTCAAGCGATTCTCCTGCCTCAGCCTCTAGACTAGCTGGGATTACAGGTGCATGCCACCATGTCCAGCTAACTTTTTTTGTTTGTTTATTTGTTTGTTTGTTTGTTTTGAGACGGAGTCTTGCTCTATTGCCCAGGCTGGAGTGCAGTGGTGCAATCTCGGCTCACTGCAAGCTTCACCTCCCGGGTTCATGCCATTCTTCTGCCTCAGCCTCCCAAGTAGCTGGGACTACAAGTGCCCGCCACCA"
 START = 1520505
 END = 1520840
-PENALTY = -10
+PENALTY = -15
 
 def ref_to_graph(ref):
     """
@@ -161,6 +170,8 @@ def backtrack(scores, max_score, topo_map, read, graph_dict):
 def graph_to_dict(graph):
     """
     graph <List: <Dict>>: the initial variation graph, converted to a dictionary for traversal
+
+    ret <Dict: <Dict, node>>: the graph represented in a python dictionary
     """
     dic_graph = {}
     for i in range(len(graph)):
@@ -230,18 +241,20 @@ if __name__ == '__main__':
     variants = read_file(args.filename[0])
     reads = read_file(args.reads[0],'\t')
 
-
+    # construct the reference graph, and add in the known variants
     graph = ref_to_graph(REF)
     graph_varied = variants_onto_graph(graph,variants)
     graph_dict = graph_to_dict(graph)
 
-
+    # topologically sort the graph
     L = toposort(graph_dict)
-
 
     print('REF: '+REF)
     for read in reads:
+        # fit each of our reads relative to the variant graph using smith-waterman
         mat = fit(L, read['RAW'], PENALTY, graph_dict)
+
+        # backtrack in our scoring matrix, to generate the fit and show the variations/deletions
         topo,align = backtrack(mat,max([max(l,key=lambda p:p[0]) for l in mat]), L, read['RAW'], graph_dict)
         print((int(read['start'])-START)*" "+"Rad: " +align)
 
