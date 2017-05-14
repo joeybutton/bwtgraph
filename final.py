@@ -244,11 +244,13 @@ if __name__ == '__main__':
     # construct the reference graph, and add in the known variants
     graph = ref_to_graph(REF)
     graph_varied = variants_onto_graph(graph,variants)
-    graph_dict = graph_to_dict(graph)
+    graph_dict = graph_to_dict(graph_varied)
 
     # topologically sort the graph
     L = toposort(graph_dict)
 
+    # REF = "PENALTY"
+    # reads = [{'RAW':"MEANLY",'start':0}]
     print('REF: '+REF)
     for read in reads:
         # fit each of our reads relative to the variant graph using smith-waterman
